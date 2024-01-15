@@ -1,4 +1,5 @@
 import { arrayCompare } from "./Directions.mjs";
+import image from "./apple.png";
 
 export default class Apple {
     constructor(width, height, canvas, body) {
@@ -37,7 +38,7 @@ export default class Apple {
             let ctx = this.canvas.getContext("2d");
             ctx.drawImage(img, this.x * this.squareSize, this.y * this.squareSize, this.squareSize, this.squareSize);
         };
-        img.src = "https://raw.githubusercontent.com/TrevorGarnett/snake_solver/main/src/snake/apple.png";
+        img.src = image;
     }
 
 }
