@@ -25,7 +25,7 @@ export class Grid {
         const neighbors = [[x, y - 1], [x, y + 1], [x - 1, y], [x + 1, y]];
         const validNeighbors = neighbors.filter(([x, y]) => {
             const bodyOfSnake = this.body.slice(timeStep);
-            return x >= 0 && x < this.width && y >= 0 && y < this.height && this.grid[y] in bodyOfSnake;
+            return x >= 0 && x < this.width && y >= 0 && y < this.height && !([x, y] in bodyOfSnake);
         });
         return validNeighbors
     }
