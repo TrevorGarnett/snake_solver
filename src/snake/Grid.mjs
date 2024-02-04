@@ -26,6 +26,7 @@ export class Grid {
         const validNeighbors = neighbors.filter(([x, y]) => {
             const bodyOfSnake = this.body.slice(timeStep);
             return x >= 0 && x < this.width && y >= 0 && y < this.height && !([x, y] in bodyOfSnake);
+            // Might need to add change so that neighbor cannot be visited element.
         });
         return validNeighbors
     }
