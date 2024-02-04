@@ -22,6 +22,45 @@ export default class Snake {
         window.requestAnimationFrame(this.step);
     }
 
+     // Function to get the game state, as a 2D array
+     getState() {
+
+        // Initialize the state array with zeros
+        let state = Array.from({ length: this.h }, () => Array.from({ length: this.w }, () => 0));
+
+        // Set '1' for snake head
+        let [headX, headY] = this.body[this.body.length - 1];
+        state[headY][headX] = 1;
+
+        // Set '2' for snake body segments
+        for (let i = 1; i < this.body.length - 1; i++) {
+            const [x, y] = this.body[i];
+            state[y][x] = 2;
+        }
+
+        // Set '3' for tail
+        let [tailX, tailY] = this.body[0];
+        state[tailY][tailX] = 3;
+
+        // Set '4' for apple
+        let [appleX, appleY] = this.apple.pos;
+        state[appleY][appleX] = 4;
+
+        return state;
+    }
+
+    printState() {
+        let currState = this.getState();
+
+        for (let i = 0; i < currState.length; i++) {
+            let string = ''
+            for (let j = 0; j < currState[i].length; j++) {
+                string += currState[i][j].toString() + ' ';
+            }
+            console.log(string + '\n');
+        }
+    }
+
     step = (timeStep) => {
         if (this.started) {
             if (this.start === undefined) {
