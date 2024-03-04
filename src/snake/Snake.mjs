@@ -1,9 +1,15 @@
 import Apple from './Apple.mjs';
 import { directions, arrayCompare } from './Directions.mjs';
+
+const EMPTY = 0;
+const HEAD = 1;
+const BODY = 2;
+const TAIL = 3;
+const APPLE = 4;
 export default class Snake {
     constructor(width, height, canvas) {
         // Head is last element of list
-        this.frequency = 170;
+        this.frequency = 200;
         this.canvas = canvas;
         this.w = width;
         this.h = height
@@ -19,43 +25,64 @@ export default class Snake {
         this.move = 0; // Index of the first move to be executed in the moves array
         this.numMoves = 0; // Number of moves in the moves array
         this.moves = new Array(5);
+        this.initalizeState();
         window.requestAnimationFrame(this.step);
     }
 
-     // Function to get the game state, as a 2D array
-     getState() {
+
+    // Function to get the game state, as a 2D array
+    initalizeState() {
 
         // Initialize the state array with zeros
-        let state = Array.from({ length: this.h }, () => Array.from({ length: this.w }, () => 0));
+        this.state = Array.from({ length: this.h }, () => Array.from({ length: this.w }, () => EMPTY));
 
         // Set '1' for snake head
         let [headX, headY] = this.body[this.body.length - 1];
-        state[headY][headX] = 1;
+        this.state[headY][headX] = HEAD;
 
         // Set '2' for snake body segments
         for (let i = 1; i < this.body.length - 1; i++) {
             const [x, y] = this.body[i];
-            state[y][x] = 2;
+            this.state[y][x] = BODY;
         }
 
         // Set '3' for tail
         let [tailX, tailY] = this.body[0];
-        state[tailY][tailX] = 3;
+        this.state[tailY][tailX] = TAIL;
 
         // Set '4' for apple
         let [appleX, appleY] = this.apple.pos;
-        state[appleY][appleX] = 4;
+        this.state[appleY][appleX] = APPLE;
+    }
 
-        return state;
+    // Move the snake in the state based on the direction
+    // Move tail to the position of the previous body segment
+    // Move body segment to the previous head position if apple not eaten
+    // Move head to the new position
+    // Move apple if necessary
+    updateState() {
+        const [headX, headY] = this.body[this.body.length - 1]; // New head location
+        const [prevX, prevY] = this.body[this.body.length - 2]; // Previous location of head at time step before
+        const [newTailX, newTailY] = this.body[0]; // New tail location
+        this.state[headY][headX] = HEAD; // Update head in 2D array
+        this.state[prevY][prevX] = BODY; // Update previous head location to body
+        this.state[newTailY][newTailX] = TAIL; // Update new tail location
+        if (!this.appleEaten) {
+            this.state[this.tail[1]][this.tail[0]] = 0; // Update tail to 0
+        }
+        else {
+            const [appleX, appleY] = this.apple.pos;
+            this.state[appleY][appleX] = APPLE; // Update apple location
+            this.appleEaten = false;
+        }
     }
 
     printState() {
-        let currState = this.getState();
-
-        for (let i = 0; i < currState.length; i++) {
+        console.log("-----------------------------------------");
+        for (let i = 0; i < this.state.length; i++) {
             let string = ''
-            for (let j = 0; j < currState[i].length; j++) {
-                string += currState[i][j].toString() + ' ';
+            for (let j = 0; j < this.state[i].length; j++) {
+                string += this.state[i][j].toString() + ' ';
             }
             console.log(string + '\n');
         }
@@ -84,6 +111,9 @@ export default class Snake {
                     this.tail = this.body.shift();
                 }
                 this.lost = this.gameOver();
+                if (!this.lost) {
+                    this.updateState();
+                }
             }
             if (!this.lost) {
                 this.grow(elapsed);
@@ -229,6 +259,8 @@ export default class Snake {
         this.apple.spawn(this.body);
         this.render();
         this.lost = false;
+
+        this.initalizeState();
     }
 
     // Render the Snake
@@ -237,7 +269,7 @@ export default class Snake {
         let ctx = this.canvas.getContext("2d");
         let x = this.body[0][0] * this.squareSize;
         let y = this.body[0][1] * this.squareSize;
-        
+
         ctx.fillStyle = "#3BB143";
         ctx.fillRect(x, y + e, 2 * this.squareSize, this.squareSize - 2 * e);
 
@@ -283,18 +315,18 @@ export default class Snake {
 
             // Snake's left eye
             ctx.fillRect(eyeX + d - this.squareSize * 2, headY + 0.2 * this.squareSize, eyeSize, eyeSize);
-    
+
             // Snake's right eye
             ctx.fillRect(eyeX + d - this.squareSize * 2, headY + 0.6 * this.squareSize, eyeSize, eyeSize);
-    
+
             // Render the Snake's pupils
             let pupilSize = 0.1 * this.squareSize;
             ctx.fillStyle = "Black";
-    
+
             // Snake's left pupil
             let pupilX = eyeX + 0.1 * this.squareSize + d;
             ctx.fillRect(pupilX - this.squareSize * 2, headY + 0.25 * this.squareSize, pupilSize, pupilSize);
-    
+
             // Snake's right pupil
             ctx.fillRect(pupilX - this.squareSize * 2, headY + 0.65 * this.squareSize, pupilSize, pupilSize);
         }
@@ -328,7 +360,7 @@ export default class Snake {
             // Snake's right pupil
             ctx.fillRect(pupilX - d, headY + 0.65 * this.squareSize, pupilSize, pupilSize);
         }
-        
+
         // Snake moving down
         else if (dir === "down") {
             // Render the Snake's eyes
@@ -353,10 +385,10 @@ export default class Snake {
 
             // Snake's left pupil
             let pupilY = eyeY + 0.1 * this.squareSize;
-            ctx.fillRect(headX +  0.25 * this.squareSize, pupilY + d - this.squareSize, pupilSize, pupilSize);
+            ctx.fillRect(headX + 0.25 * this.squareSize, pupilY + d - this.squareSize, pupilSize, pupilSize);
 
             // Snake's right pupil
-            ctx.fillRect(headX +  0.65 * this.squareSize, pupilY + d - this.squareSize, pupilSize, pupilSize);
+            ctx.fillRect(headX + 0.65 * this.squareSize, pupilY + d - this.squareSize, pupilSize, pupilSize);
         }
         // Snake moving up
         else if (dir === "up") {
@@ -381,10 +413,10 @@ export default class Snake {
 
             // Snake's left pupil
             let pupilY = eyeY;
-            ctx.fillRect(headX +  0.25 * this.squareSize, pupilY - d, pupilSize, pupilSize);
+            ctx.fillRect(headX + 0.25 * this.squareSize, pupilY - d, pupilSize, pupilSize);
 
             // Snake's right pupil
-            ctx.fillRect(headX +  0.65 * this.squareSize, pupilY - d, pupilSize, pupilSize);
+            ctx.fillRect(headX + 0.65 * this.squareSize, pupilY - d, pupilSize, pupilSize);
         }
     }
 }

@@ -1,11 +1,29 @@
+import { AStar } from './Pathfind.mjs';
 import { useEffect } from 'react';
 import Snake from "./Snake.mjs";
 import Board from "./Board.mjs";
+
+// Delete the below after our test
+const A = [
+    [0, 1, 0, 0, 1, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1, 0, 0, 1, 0],
+    [0, 0, 1, 0, 0, 1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 1, 1, 1, 0, 1],
+    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+];
+const start = [0, 0];
+const end = [9, 9];
 
 const SnakeGame = () => {
     useEffect(() => {
         return () => {
             console.log("Reading main successfully");
+            console.log(AStar(A, start, end));
             // Get canvas
             let canvas1 = document.getElementById("canvas1");
             let canvas2 = document.getElementById("canvas2");
